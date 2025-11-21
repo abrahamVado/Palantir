@@ -7,24 +7,26 @@ This plan defines the tasks to build a React/Next.js frontend that consumes the 
 - Deliver authenticated workflows for dashboard, users, teams, permissions, and roles backed by the `/v1/user`, `/v1/notifications`, and `/admin/*` endpoints.
 - Use [shadcn/ui](https://github.com/shadcn-ui/ui) and [shadcn/ui blocks](https://ui.shadcn.com/blocks) for all UI primitives and page sections.
 
+> Standards references: align all items below with [Frontend Standards Decisions](../../decisions/frontend-standards/README.md) to avoid re-opening settled choices.
+
 ## Task Breakdown
 1. **Project Scaffolding**
-   - Create a Next.js project (TypeScript) configured for SSR/ISR as needed; confirm required Next.js version and package manager with the team before scaffolding.
+   - Create a Next.js 14.2.x TypeScript project configured for SSR/ISR with **pnpm v9+** on **Node.js 20**, following the scaffold in the standards decision.
    - Add Tailwind CSS and integrate shadcn/ui setup scripts; document the generated component directory and alias structure.
-   - Establish environment variable contract for the backend base URL and public path configuration without hard-coding values.
+   - Establish environment variable handling for the shared backend origin `https://api.softwaremia.com` and public path configuration without hard-coding values.
 
 2. **API Client Foundation**
    - Build a typed HTTP client for the documented endpoints (auth, notifications, admin resources) with shared request/response envelope parsing based on ADR-003 conventions described in the backend README.
-   - Implement token storage/refresh behavior mapping to `/v1/auth/login`, `/v1/auth/refresh`, `/v1/auth/logout`, and `/v1/user`; keep refresh behavior configurable pending confirmation of token lifetimes.
-   - Add request guards for endpoints requiring `Authorization: Bearer <access token>` and allow opt-in inclusion for public routes.
+   - Implement the cookie-based token model (Secure, HttpOnly, SameSite=Strict) covering `/v1/auth/login`, `/v1/auth/refresh`, `/v1/auth/logout`, and `/v1/user`; assume access token ~15 minutes and refresh token ~7 days with rotation on refresh.
+   - Add request guards for endpoints requiring `Authorization: Bearer <access token>` and allow opt-in inclusion for public routes, always sending `credentials: 'include'` to honor cookie-based auth.
 
 3. **Authentication & Session Flow**
    - Implement login form using shadcn form components and actions wired to `/v1/auth/login`; capture errors using the backend envelope format.
-   - Add registration and logout flows using `/v1/auth/register` and `/v1/auth/logout` when approved; keep refresh sequence aligned with `/v1/auth/refresh`.
+   - Keep registration UI suppressed per current standards but leave a clearly documented placeholder/toggle for future enablement of `/v1/auth/register`; implement logout with `/v1/auth/logout` and keep refresh aligned with `/v1/auth/refresh`.
    - Gate private routes (dashboard, users, teams, permissions, roles) via middleware or server-side guards that validate the session through `/v1/user`.
 
 4. **Public Pages**
-   - Compose a marketing landing page using shadcn blocks; pull any dynamic content from configuration rather than hard-coded copy.
+   - Compose a marketing landing page using shadcn blocks; pull any dynamic content from configuration rather than hard-coded copy and keep the color palette aligned with the default black/white shadcn theming plus the overridable `--accent-color`.
    - Build the login page (public) that routes authenticated users to the dashboard after successful token issuance.
 
 5. **Dashboard Shell & Navigation**
@@ -46,13 +48,12 @@ This plan defines the tasks to build a React/Next.js frontend that consumes the 
    - Support verification link handling for `/email/verify/{id}/{hash}` and resend flow for `/email/verification-notification`, ensuring UI states reflect success and throttling (HTTP 429) responses.
 
 9. **Testing & Quality Gates**
-   - Define integration tests or API contract checks for each endpoint used by the frontend (e.g., MSW mocks or contract tests) without assuming backend availability.
-   - Include accessibility and visual regression coverage where feasible; document any required tooling approvals.
+   - Document expectations for integration coverage and API contract checks without prescribing tools; defer generating automated tests until the team requests them.
+   - Include accessibility and visual regression considerations where feasible; note any required tooling approvals before adding them later.
 
 ## Dependencies & Sequencing
-- Confirm the backend base URL, token lifetime expectations, and whether refresh tokens are http-only cookies or stored in memory/localStorage.
-- Validate which admin endpoints require specific permission slugs before wiring role-based UI gating.
-- Align on deployment target (Vercel, self-hosted, etc.) to set Next.js output configuration.
+- Validate which admin endpoints require specific permission slugs before wiring role-based UI gating (see permissions map reference).
+- Capture any remaining deployment-specific environment variable details for the Dockerized `next start` target if they differ by environment.
 
 ## Definition of Done
 - All public and private routes render using shadcn/ui blocks without custom design systems.
