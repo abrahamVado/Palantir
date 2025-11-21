@@ -1,13 +1,17 @@
 # Open Questions for Frontend Scope
 
-The following items need confirmation to avoid assumptions while planning the Next.js + shadcn/ui implementation against the Larago backend:
+Reference: settled answers live in [Frontend Standards Decisions](../../decisions/frontend-standards/README.md). Use this list to track any remaining items that truly need product/engineering input.
 
-1. What Next.js version and package manager should we standardize on (e.g., `create-next-app` version, npm vs pnpm vs yarn)?
-2. What is the backend base URL for local and deployed environments, and are there distinct staging/production instances?
-3. How should access and refresh tokens be stored on the client (http-only cookies, memory, or localStorage), and what are the token lifetime/rotation expectations?
-4. Should registration be exposed in the UI, or is authentication limited to login for existing users only?
-5. Which permission slugs gate each admin screen (users, roles, permissions, teams), and should the UI hide or disable controls based on the principal’s permissions from `/v1/user`?
-6. Are there brand guidelines, typography, or color tokens to apply on top of shadcn/ui blocks for the landing and dashboard pages?
-7. Do we need internationalization/localization support from the outset (e.g., Next.js `app` router `i18n` configuration)?
-8. Should the dashboard surface notifications in real time (polling or websockets), or is manual refresh sufficient?
-9. Are there constraints on hosting/deployment (e.g., Vercel, containerized Next.js server) that affect routing mode or output configuration?
+## Resolved items
+1. **Framework and tooling:** Next.js 14.2.x scaffolded with **pnpm v9+** on **Node.js 20**; lock the scaffold using `pnpm dlx create-next-app@14.2.11`.
+2. **Backend origin:** Always call `https://api.softwaremia.com` for all environments; no separate staging/production hosts defined yet.
+3. **Token storage and lifetimes:** Access and refresh tokens arrive as Secure, HttpOnly, SameSite=Strict cookies. Access token ~15 minutes; refresh ~7 days with rotation on refresh; send `credentials: 'include'` for API calls.
+4. **Authentication surface:** UI exposes login only for now. Registration stays hidden, but leave a documented toggle/placeholder so `/v1/auth/register` can be enabled later without redesign.
+5. **Permission gating:** Admin screens should check permission slugs from `/v1/user` and hide/disable controls accordingly (see permissions map in `docs/permissions/admin-access/README.md`).
+6. **Branding:** Use shadcn defaults with a black/white base palette; no extra assets beyond the existing overridable `--accent-color` token.
+7. **Internationalization:** Out of scope; no Next.js `i18n` setup required initially.
+8. **Notifications:** Manual refresh is sufficient; do not add polling or websockets yet.
+9. **Hosting/deployment:** Target Dockerized `next build` + `next start` with `output: 'standalone'`; avoid Vercel-specific features.
+
+## Pending items
+- None at this time. Reopen this section if new requirements emerge (e.g., additional branding assets or future i18n needs).
