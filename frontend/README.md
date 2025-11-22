@@ -12,6 +12,11 @@ A Next.js 14.2 TypeScript app scaffolded with pnpm, Tailwind CSS, and shadcn/ui 
 - Run the container while pointing at your backend origin: `docker run -p 3000:3000 -e BACKEND_ORIGIN=https://api.softwaremia.com larago-frontend`
 - Override the backend at deploy time by setting `BACKEND_ORIGIN` (applies to both build and runtime); it flows into `NEXT_PUBLIC_API_BASE_URL` and `API_BASE_URL` inside the container.
 
+## Docker Compose
+- From the repository root, run `docker compose up --build` to build and start the frontend container defined in `docker-compose.yml`.
+- Override the backend origin with `BACKEND_ORIGIN=<your-backend>` and change the host port with `PORT=<host-port>` when invoking `docker compose`.
+- The compose file reuses the frontend Dockerfile and exposes port 3000 in the container for `next start`.
+
 ## Configuration
 - `NEXT_PUBLIC_API_BASE_URL` (client + server): overrides the backend origin. Defaults to `https://api.softwaremia.com` when unset.
 - `API_BASE_URL` (server-only fallback): optional alternate origin for server components.
