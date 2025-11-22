@@ -1,0 +1,14 @@
+# //1.- Build and run the Next.js frontend container using the existing Dockerfile so the app stays aligned with the documented Docker workflow.
+# //2.- Expose the frontend on port 3000 by default and let callers override the backend origin and host port via environment variables.
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        BACKEND_ORIGIN: ${BACKEND_ORIGIN:-https://api.softwaremia.com}
+    environment:
+      BACKEND_ORIGIN: ${BACKEND_ORIGIN:-https://api.softwaremia.com}
+    ports:
+      - "${PORT:-3000}:3000"
+    restart: unless-stopped
