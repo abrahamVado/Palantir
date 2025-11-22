@@ -49,14 +49,20 @@ export async function apiFetch<T>(path: string, init: ApiRequestInit = {}) {
   const envelope = (await response.json().catch(() => ({}))) as ApiEnvelope<T>;
 
   //4.- Surface API errors with structured context for UI layers.
-  if (!response.ok || envelope.status === "error") {
+  const errorEnvelope = envelope.status === "error" ? envelope : undefined;
+  if (!response.ok || errorEnvelope) {
     throw new ApiClientError(
-      envelope.message ?? response.statusText,
+      errorEnvelope?.message ?? response.statusText,
       response.status,
-      envelope.status === "error" ? envelope : undefined,
+      errorEnvelope,
     );
   }
 
-  //5.- Return the typed data payload to the caller when successful.
+  //5.- Safeguard against malformed envelopes before returning data.
+  if (envelope.status !== "success") {
+    throw new ApiClientError(response.statusText, response.status);
+  }
+
+  //6.- Return the typed data payload to the caller when successful.
   return envelope.data;
 }
