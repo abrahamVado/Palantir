@@ -1,8 +1,7 @@
-version: "3.9"
-
+# //1.- Build the Next.js frontend image using the local Dockerfile while keeping the default Compose container naming to avoid conflicts with existing containers.
+# //2.- Expose the app on port 3000 by default for local development or deployment while keeping production-friendly environment defaults.
 services:
   next:
-    container_name: nextjs
     build:
       context: .
       dockerfile: Dockerfile
