@@ -15,7 +15,7 @@ export async function OPTIONS() {
   });
 }
 
-export async function handler(request: Request, context: { params: { path: string[] } }) {
+async function proxyRequest(request: Request, context: { params: { path: string[] } }) {
   //1.- Assemble the backend URL by merging the configured origin with the requested path segments.
   const backendUrl = new URL(`/${context.params.path.join("/")}`, appConfig.backendOrigin);
 
@@ -43,4 +43,4 @@ export async function handler(request: Request, context: { params: { path: strin
   });
 }
 
-export { handler as GET, handler as POST, handler as PUT, handler as PATCH, handler as DELETE };
+export { proxyRequest as GET, proxyRequest as POST, proxyRequest as PUT, proxyRequest as PATCH, proxyRequest as DELETE };
