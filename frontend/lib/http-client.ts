@@ -30,10 +30,17 @@ export type ApiRequestInit = RequestInit & {
 };
 
 export async function apiFetch<T>(path: string, init: ApiRequestInit = {}) {
-  //1.- Build the absolute URL relative to the configured backend origin.
-  const url = new URL(path.startsWith("/") ? path : `/${path}`, appConfig.backendOrigin);
+  //1.- Normalize the requested path to guarantee a leading slash.
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
-  //2.- Merge caller options with defaults that preserve cookie-based authentication.
+  //2.- Route browser requests through the Next.js proxy endpoint to avoid CORS preflight
+  //    failures while server-side calls continue to hit the backend origin directly.
+  const url =
+    typeof window === "undefined"
+      ? new URL(normalizedPath, appConfig.backendOrigin)
+      : new URL(`/api/proxy${normalizedPath}`, window.location.origin);
+
+  //3.- Merge caller options with defaults that preserve cookie-based authentication.
   const requestInit: RequestInit = {
     method: "GET",
     credentials: "include",
@@ -44,11 +51,11 @@ export async function apiFetch<T>(path: string, init: ApiRequestInit = {}) {
     ...init,
   };
 
-  //3.- Execute the request and parse the ADR-003 style envelope.
+  //4.- Execute the request and parse the ADR-003 style envelope.
   const response = await fetch(url, requestInit);
   const envelope = (await response.json().catch(() => ({}))) as ApiEnvelope<T>;
 
-  //4.- Surface API errors with structured context for UI layers.
+  //5.- Surface API errors with structured context for UI layers.
   const errorEnvelope = envelope.status === "error" ? envelope : undefined;
   if (!response.ok || errorEnvelope) {
     throw new ApiClientError(
@@ -58,11 +65,11 @@ export async function apiFetch<T>(path: string, init: ApiRequestInit = {}) {
     );
   }
 
-  //5.- Safeguard against malformed envelopes before returning data.
+  //6.- Safeguard against malformed envelopes before returning data.
   if (envelope.status !== "success") {
     throw new ApiClientError(response.statusText, response.status);
   }
 
-  //6.- Return the typed data payload to the caller when successful.
+  //7.- Return the typed data payload to the caller when successful.
   return envelope.data;
 }
