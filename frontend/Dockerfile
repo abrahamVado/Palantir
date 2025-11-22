@@ -16,6 +16,8 @@ ENV NEXT_PUBLIC_API_BASE_URL=${BACKEND_ORIGIN}
 ENV API_BASE_URL=${BACKEND_ORIGIN}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# //3.1.- Ensure a public directory exists so downstream stages can copy static assets.
+RUN mkdir -p public
 RUN pnpm run build
 
 # //4.- Produce a lean runtime image with the compiled assets and configurable backend origin.
