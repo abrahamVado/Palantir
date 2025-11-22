@@ -1,0 +1,11 @@
+# //1.- Exclude build outputs and dependencies to keep Docker contexts small.
+.next
+node_modules
+
+# //2.- Omit VCS and editor metadata that are not required inside the container.
+.git
+.gitignore
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store

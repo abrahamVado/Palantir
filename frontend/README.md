@@ -7,6 +7,11 @@ A Next.js 14.2 TypeScript app scaffolded with pnpm, Tailwind CSS, and shadcn/ui 
 2. Run the dev server on Node.js 20: `pnpm dev`
 3. Visit http://localhost:3000 to view the landing page and `/login` for the auth form.
 
+## Docker
+- Build the production image from the `frontend` directory: `docker build -t larago-frontend .`
+- Run the container while pointing at your backend origin: `docker run -p 3000:3000 -e BACKEND_ORIGIN=https://api.softwaremia.com larago-frontend`
+- Override the backend at deploy time by setting `BACKEND_ORIGIN` (applies to both build and runtime); it flows into `NEXT_PUBLIC_API_BASE_URL` and `API_BASE_URL` inside the container.
+
 ## Configuration
 - `NEXT_PUBLIC_API_BASE_URL` (client + server): overrides the backend origin. Defaults to `https://api.softwaremia.com` when unset.
 - `API_BASE_URL` (server-only fallback): optional alternate origin for server components.
