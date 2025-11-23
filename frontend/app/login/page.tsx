@@ -38,7 +38,7 @@ export default function LoginPage() {
       login({ email, password })
         .then(() => {
           //3.- Confirm success so the caller can redirect to the dashboard shell.
-          setStatus("Login successful. Tokens saved to cookies.");
+          setStatus("Login successful. HttpOnly cookies updated for web sessions.");
         })
         .catch((error) => {
           if (error instanceof ApiClientError && error.envelope?.errors) {
@@ -62,7 +62,7 @@ export default function LoginPage() {
           <div>
             <CardTitle className="text-2xl">Sign in</CardTitle>
             <CardDescription>
-              Use your provisioned credentials to request HttpOnly tokens from /v1/auth/login.
+              Use your provisioned credentials to request HttpOnly tokens from /v1/next-auth/login.
             </CardDescription>
           </div>
         </CardHeader>

@@ -26,9 +26,19 @@ Both values are normalized to avoid trailing slashes and are reused by the share
 ## Included Foundations
 - shadcn/ui base styles with button, card, input, and label primitives ready for page builds.
 - `app/page.tsx` provides a landing view summarizing required workflows and linking to login.
-- `app/login/page.tsx` posts credentials to `/v1/auth/login` with `credentials: "include"` via the shared client.
+- `app/login/page.tsx` posts credentials to `/v1/next-auth/login` with `credentials: "include"` via the shared client.
 - `lib/http-client.ts` reads ADR-003 envelopes and raises structured errors for form handling.
 - `lib/auth.ts` centralizes login/logout/user fetch helpers for upcoming protected routes.
+
+## Next.js-friendly authentication endpoints
+
+The frontend is wired to the backend at `https://api.softwaremia.com` and consumes the Next.js-compatible authentication routes that issue secure cookies while also returning tokens for hydration:
+
+- `POST /v1/next-auth/login` sets `next_access_token` and `next_refresh_token` HttpOnly cookies and returns the pair in the JSON body.
+- `POST /v1/next-auth/refresh` rotates the refresh token via the cookie fallback or a `refresh_token` body override and returns the updated pair.
+- `POST /v1/next-auth/logout` clears both cookies and revokes the provided tokens when supplied.
+
+When calling these endpoints from the browser, use `fetch` with `credentials: "include"` so cookies are preserved, then hydrate any client state using the token pair returned in the response body.
 
 ## Next Steps
 - Add dashboard and admin CRUD routes that load the principal via `/v1/user` before rendering protected layouts.
